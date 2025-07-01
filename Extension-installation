@@ -1,0 +1,66 @@
+Installation (Developer Mode)
+
+Open your Chrome/Edge browser and navigate to chrome://extensions/
+
+Enable Developer Mode (toggle top right)
+
+Click Load unpacked and select the folder where you saved the files
+
+Visit websites with known phishing keywords/domains in URL to test blocking:
+
+content.js
+
+const phishingKeywords = [
+  "paypal-login", "secure-update", "bank-verification", "apple-id", "reset-password",
+  "amazon-security", "free-gift", "account-verify", "login-alert", "verify-account",
+  // (Add hundreds more as needed)
+];
+
+const suspiciousDomains = [
+  "login-paypal-security.com", "secure-amazon-check.com", "apple-id-reset.net",
+  "verifybank-login.org", "freegift-cards-claim.com", "update-info-security.net",
+  // (Add hundreds more as needed)
+];
+
+const currentURL = window.location.href.toLowerCase();
+const hostname = window.location.hostname.toLowerCase();
+
+const isSuspicious =
+  phishingKeywords.some(keyword => currentURL.includes(keyword)) ||
+  suspiciousDomains.some(domain => hostname.includes(domain));
+
+if (isSuspicious) {
+  document.documentElement.innerHTML = '';
+  document.body.style.backgroundColor = '#111';
+  document.body.style.color = 'white';
+  document.body.style.fontFamily = 'Arial, sans-serif';
+  document.body.style.textAlign = 'center';
+  document.body.style.paddingTop = '100px';
+  document.body.innerHTML = `
+    <h1 style="font-size: 3em; color: red;">⚠Warning: Potential Phishing Site</h1>
+    <p>This website may be trying to steal your personal information.</p>
+    <p>Access has been blocked by <strong>TrustGuard</strong>.</p>
+  `;
+}
+
+
+manifest.json
+
+{
+  "manifest_version": 3,
+  "name": "TrustGuard – Anti-Phishing",
+  "version": "1.0",
+  "description": "Blocks access to known or suspicious phishing websites.",
+  "permissions": ["tabs", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "128": "icon.png"
+  }
+}
+
